@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Registration</title>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            updatingProfile();
+            logOut();
+        });
+
+
+        function updatingProfile() {
+            //mapiram vec upisane podatke
+            let item = sessionStorage.getItem("username");
+            $.get("/api/Users/GetVisitor", { 'username': item }, function (data, status) {
+                console.log('usao u get');
+                $("#firstname").val(data.FirstName);
+                $("#lastname").val(data.LastName);
+                $("#username").val(data.Username);
+                $("#password").val(data.Password);
+                if (data.Gender == 1)
+                    $("#gender").val("1").change();
+
+                $("#email").val(data.Email);
+                //2022-06-01T00:00:00
+                $("#birthday").val(data.Birthday.substring(0, 10));
+                console.log('datum:' + data.Birthday);
+
+                newCredentials();
+            });
+        }
+
+        function newCredentials() {
+            $('#btnChange').click(function () {
+                let firstname = $("#firstname").val();
+                let lastname = $("#lastname").val();
+                let username = $("#username").val();
+                let password = $("#password").val();
+                let gender = $("#gender").find(":selected").text();
+                let email = $("#email").val();
+                let birthday = $('#birthday').val();
+
+                //ako nismo mjenjali username nema potrebe za provjerom baze
+                let usrnm = sessionStorage.getItem("username");
+                if (usrnm != username) {
+                    $.get("/api/Users/GetAllVisitors", function (data, status) {
+                        console.log('usao u get');
+                        for (i in data) {
+                            if (data[i].Username == username) {
+                                $("#usernameError").html('Korisnicko ime vec postoji!');
+                                $("#usernameError").show();
+                            }
+                        }
+                    });
+                }
+
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (firstname == "") {
+                    $("#firstnameError").html('Unesite ime!');
+                    $("#firstnameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#firstnameError").hide();
+                }
+
+                if (lastname == "") {
+                    $("#lastnameError").html('Unesite prezime!');
+                    $("#lastnameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#lastnameError").hide();
+                }
+
+                if (username == "") {
+                    $("#usernameError").html('Unesite korisnicko ime!');
+                    $("#usernameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#usernameError").hide();
+                }
+
+                if (password == "") {
+                    $("#passwordError").html('Unesite lozinku!');
+                    $("#passwordError").show();
+                    flag = false;
+                }
+                else {
+                    $("#passwordError").hide();
+                }
+
+                if (email == "") {
+                    $("#emailError").html('Unesite e mail!');
+                    $("#emailError").show();
+                    flag = false;
+                }
+                else {
+                    $("#emailError").hide();
+                }
+
+                if (birthday == "") {
+                    $("#birthdayError").html('Unesite datum rodjenja!');
+                    $("#birthdayError").show();
+                    flag = false;
+                }
+                else {
+                    $("#birthdayError").hide();
+                }
+
+                let item = sessionStorage.getItem("username");
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/api/Register/Update/' + item,
+                        data:
+                        {
+                            'firstname': firstname,
+                            'lastname': lastname,
+                            'username': username,
+                            'password': password,
+                            'gender': gender,
+                            'email': email,
+                            'birthday': birthday
+                        },
+                        success: function (result) {
+                            if (result != null) {
+                                $("#alert-success").fadeIn(2000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno izmenjen');
+                                sessionStorage.clear();
+
+                                //postavljamo novu sesiju korisnika
+                                sessionStorage.setItem('username', username);
+                                sessionStorage.setItem('password', password);
+                                //sessionStorage.setItem('uloga', StrRole);
+                                sessionStorage.setItem('token', 'Basic ' + btoa(username + ":" + password));
+
+                                //window.location.reload();
+                                //window.location.replace("/HTML_pages/Visitor/HomeVisitor.html");
+
+
+                            }
+                            else {
+                                $("#alert-danger").fadeIn(2000);
+                                $("#alert-danger").fadeOut(1000);
+                                console.log('neuspjesno kreiran');
+                            }
+                        }
+                    });
+                }
+
+            });
+        }
+
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeVisitor.html">Home</a>
+        <a href="MyTrainings.html">Treninzi</a>
+        <a style="float: right" href="" id="logout">Log out</a>
+        <a style="float: right" href="MyProfile.html">Profil</a>
+    </div>
+
+    <div id="mainDiv">
+        <div id="registration">
+            <h2>Moj profil</h2>
+            <div>
+
+                <label>Ime:</label>
+                <input id="firstname" type="text" name="firstname" />
+                <label id='firstnameError' style="display: none; color: red"></label>
+                <br />
+
+                <label>Prezime:</label>
+                <input id="lastname" name="lastname" />
+                <label id='lastnameError' style="display: none; color: red"></label>
+                <br />
+
+                <label>Korisničko ime:</label>
+                <input id="username" type="text" name="username" />
+                <label id='usernameError' style="display: none; color: red"></label>
+                <br />
+
+                <label>Lozinka:</label>
+                <input id="password" type="password" name="password" />
+                <label id='passwordError' style="display: none; color: red"></label>
+                <br />
+
+                <label>Pol:</label>
+                <select id="gender">
+                    <option value="0">Muški</option>
+                    <option value="1">Ženski</option>
+                </select>
+                <br />
+
+                <label>Datum rodjenja:</label>
+                <input type="date" id="birthday" name="birthday">
+                <label id='birthdayError' style="display: none; color: red"></label>
+                <br />
+
+                <label>E mail:</label>
+                <input id="email" type="text" name="email" />
+                <label id='emailError' style="display: none; color: red"></label>
+                <br />
+
+            </div>
+            <input id="btnChange" type="submit" value="Izmeni" />
+        </div>
+
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesna izmjena podataka!</strong>
+        </div>
+        <div id="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Izmjena podataka neuspjesna. Provjerite unesene podatke!
+        </div>
+    </div>
+
+</body>
+</html>

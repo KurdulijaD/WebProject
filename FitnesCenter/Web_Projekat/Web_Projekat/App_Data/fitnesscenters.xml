@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfFitnessCenter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <FitnessCenter>
+    <Name>Fitness Zone</Name>
+    <Address>
+      <StreetName>Kosovska</StreetName>
+      <StreetNumber>1</StreetNumber>
+      <City>Bileca</City>
+      <PostNumber>12000</PostNumber>
+    </Address>
+    <OpeningYear>2015</OpeningYear>
+    <Owner>mika</Owner>
+    <MonthlyPrice>20</MonthlyPrice>
+    <YearPrice>200</YearPrice>
+    <TrainingPrice>5</TrainingPrice>
+    <GroupTrainingPrice>3</GroupTrainingPrice>
+    <TrainingWithTrainerPrice>10</TrainingWithTrainerPrice>
+    <Deleted>false</Deleted>
+    <FcId>1</FcId>
+  </FitnessCenter>
+  <FitnessCenter>
+    <Name>No Limit</Name>
+    <Address>
+      <StreetName>Novo Naselje</StreetName>
+      <StreetNumber>2</StreetNumber>
+      <City>Gacko</City>
+      <PostNumber>18000</PostNumber>
+    </Address>
+    <OpeningYear>2020</OpeningYear>
+    <Owner>pera</Owner>
+    <MonthlyPrice>30</MonthlyPrice>
+    <YearPrice>250</YearPrice>
+    <TrainingPrice>10</TrainingPrice>
+    <GroupTrainingPrice>5</GroupTrainingPrice>
+    <TrainingWithTrainerPrice>20</TrainingWithTrainerPrice>
+    <Deleted>false</Deleted>
+    <FcId>2</FcId>
+  </FitnessCenter>
+  <FitnessCenter>
+    <Name>Classic Gym</Name>
+    <Address>
+      <StreetName>Dr. Sime Milosevica</StreetName>
+      <StreetNumber>10</StreetNumber>
+      <City>Novi Sad</City>
+      <PostNumber>21000</PostNumber>
+    </Address>
+    <OpeningYear>2006</OpeningYear>
+    <Owner>zika</Owner>
+    <MonthlyPrice>15</MonthlyPrice>
+    <YearPrice>150</YearPrice>
+    <TrainingPrice>10</TrainingPrice>
+    <GroupTrainingPrice>10</GroupTrainingPrice>
+    <TrainingWithTrainerPrice>20</TrainingWithTrainerPrice>
+    <Deleted>false</Deleted>
+    <FcId>3</FcId>
+  </FitnessCenter>
+  <FitnessCenter>
+    <Name>Gladiator Fitness</Name>
+    <Address>
+      <StreetName>Cirpanova</StreetName>
+      <StreetNumber>2</StreetNumber>
+      <City>Novi Sad</City>
+      <PostNumber>18000</PostNumber>
+    </Address>
+    <OpeningYear>2002</OpeningYear>
+    <Owner>pera</Owner>
+    <MonthlyPrice>30</MonthlyPrice>
+    <YearPrice>300</YearPrice>
+    <TrainingPrice>15</TrainingPrice>
+    <GroupTrainingPrice>20</GroupTrainingPrice>
+    <TrainingWithTrainerPrice>25</TrainingWithTrainerPrice>
+    <Deleted>false</Deleted>
+    <FcId>4</FcId>
+  </FitnessCenter>
+  <FitnessCenter>
+    <Name>Flex Fitness</Name>
+    <Address>
+      <StreetName>Trg republike</StreetName>
+      <StreetNumber>10</StreetNumber>
+      <City>Novi Sad</City>
+      <PostNumber>21000</PostNumber>
+    </Address>
+    <OpeningYear>2017</OpeningYear>
+    <Owner>zika</Owner>
+    <MonthlyPrice>10</MonthlyPrice>
+    <YearPrice>100</YearPrice>
+    <TrainingPrice>5</TrainingPrice>
+    <GroupTrainingPrice>5</GroupTrainingPrice>
+    <TrainingWithTrainerPrice>10</TrainingWithTrainerPrice>
+    <Deleted>false</Deleted>
+    <FcId>5</FcId>
+  </FitnessCenter>
+</ArrayOfFitnessCenter>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfUser xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <User>
+    <Username>Luka</Username>
+    <Password>cirko</Password>
+    <FirstName>Luka</FirstName>
+    <LastName>Ciric</LastName>
+    <Gender>MALE</Gender>
+    <Email>cirko@hotmail.com</Email>
+    <Birthday>2000-06-24T00:00:00</Birthday>
+    <Role>TRAINER</Role>
+    <SignedTrainings>
+      <int>1</int>
+      <int>2</int>
+      <int>9</int>
+      <int>10</int>
+      <int>14</int>
+    </SignedTrainings>
+    <FitnessCenterId>2</FitnessCenterId>
+    <Centers />
+    <Blocked>false</Blocked>
+  </User>
+  <User>
+    <Username>sofija</Username>
+    <Password>sofija</Password>
+    <FirstName>Sofija</FirstName>
+    <LastName>Dangubic</LastName>
+    <Gender>FEMALE</Gender>
+    <Email>cirko</Email>
+    <Birthday>2001-02-16T00:00:00</Birthday>
+    <Role>TRAINER</Role>
+    <SignedTrainings>
+      <int>6</int>
+      <int>7</int>
+      <int>11</int>
+      <int>12</int>
+    </SignedTrainings>
+    <FitnessCenterId>1</FitnessCenterId>
+    <Centers />
+    <Blocked>false</Blocked>
+  </User>
+</ArrayOfUser>

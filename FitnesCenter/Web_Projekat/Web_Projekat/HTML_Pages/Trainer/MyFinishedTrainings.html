@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadTrainings();
+            logOut();
+            sortFinishedTrainings();
+            searchFinishedTrainings();
+            showVisitors();
+        });
+
+
+        function getFcId(id) {
+            var retVal = "";
+            $.ajax({
+                url: "/api/Training/GetFC?id=" + id,
+                type: 'GET',
+                success: function (res) {
+                    retVal = res;
+                },
+                async: false
+            });
+
+            return retVal
+        }
+
+        //------DOBAVI TRENINGE ZA TRENERA
+        function loadTrainings() {
+            let username = sessionStorage.getItem('username');
+            $.get("/api/Training/GetTrainingsForTrainer", { 'username': username }, function (data, status) {
+                console.log('usao u get' + data);
+                printPastTrainings(data)
+            }).fail((xhr) => { console.log(xhr.responseText); });
+        }
+
+        //------------ISPIS TRENINGA
+        function printPastTrainings(data) {
+            let item = "";
+            if (data == null) {
+                item += "<h4>Nemate zakazanih treninga<h4>";
+            }
+            else {
+                item += `<div><table border=1>`;
+                item += `<tr><th id="thName">Naziv</th><th id="thType">Tip treninga</th><th>Fitnes centar</th><th>Trajanje treninga</th><th id="thDate">Datum odrzavanja</th><th>Maksimalno posjetilaca</th><th>Broj prisutnih</th></tr>`;
+
+                for (i in data) {
+                    if (data[i].Finished == true && data[i].Deleted == false) {
+                        var fc = getFcId(data[i].FitnessCenterId);
+                        item += `<tr><td>${data[i].Name}</td>`;
+                        item += `<td>${data[i].Type}</td>`;
+                        item += `<td>${fc.Name}</td>`;
+                        item += `<td>${data[i].DurationOfTraining}min</td>`;
+                        item += `<td>${data[i].StrDate}</td>`;
+                        item += `<td>${data[i].MaxVisitor}</td>`;
+                        item += `<td>${data[i].Visitors.length} <button name="${data[i].TrainingId}" class="btnShow">Prikazi</button></td>`;
+                    }
+                }
+                item += `</table></div>`;
+
+                //
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1;
+                var yyyy = today.getFullYear();
+
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+
+                today = yyyy + '-' + mm + '-' + dd;
+
+                let dateMin = `<input type="date" name="yearLow" id="yearLow" min='${fc.OpeningYear}-01-01' max='${today}'/>`;
+                let dateMax = `<input type="date" name="yearHigh" id="yearHigh" min='${fc.OpeningYear}-01-01' max='${today}'/>`;
+                $('#dateMin').html(dateMin);
+                $('#dateMax').html(dateMax);
+                //
+            }
+            $('#tr').html(item);
+            console.log('zavrsio ispis treninga');
+
+        }
+
+
+        //--------PRIKAZI KO JE PRIUSTVOVAO TRENINGU
+        function showVisitors() {
+            console.log('usao u btn za visitore');
+            $(document).on('click', '.btnShow', function () {
+                let id = $(this).attr('name');
+                window.location.replace("/HTML_Pages/Trainer/ShowVisitors.html?id=" + id);
+            });
+        }
+
+
+        //--------PRETRAGA ZAVRSENIH TRENINGA
+        function searchFinishedTrainings() {
+            $('#btnSearch').click(function () {
+                let username = sessionStorage.getItem('username');
+                let name = $("#name").val();
+                let type = $("#type").find(":selected").text();
+                let yearLow = $("#yearLow").val();
+                let yearHigh = $("#yearHigh").val();
+
+
+
+
+                $.get("/api/Training/SearchTraining",
+                    {
+                        //string username, string name, string type, string yearHigh, string yearLow
+                        'username': username,
+                        'name': name,
+                        'type': type,
+                        'yearHigh': yearHigh,
+                        'yearLow': yearLow
+
+                    }, function (data, status) {
+                        console.log('usao u dugme');
+                        printPastTrainings(data);
+                    });
+            });
+        }
+
+
+        //------SORTIRANJE ZAVRSENIH TRENINGA
+        let trName = false;
+        let trDate = false;
+        let trType = false;
+        function sortFinishedTrainings() {
+            let username = sessionStorage.getItem('username');
+            $(document).on('click', '#thName', function () {
+                if (!trName) {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "name_des", 'username': username }, function (data, status) {
+                        console.log('usao u sort imena des');
+                        printPastTrainings(data);
+                        trName = true;
+                    });
+                }
+                else {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "name_asc", 'username': username }, function (data, status) {
+                        console.log('usao u sort imena asc');
+                        printPastTrainings(data);
+                        trName = false;
+                    });
+                }
+
+            });
+
+            $(document).on('click', '#thDate', function () {
+                if (!trDate) {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "date_des", 'username': username }, function (data, status) {
+                        console.log('usao u sort datum des');
+                        printPastTrainings(data);
+                        trDate = true;
+                    });
+                }
+                else {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "date_asc", 'username': username }, function (data, status) {
+                        console.log('usao u sort datum asc');
+                        printPastTrainings(data);
+                        trDate = false;
+                    });
+                }
+
+            });
+
+            $(document).on('click', '#thType', function () {
+                if (!trType) {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "type_des", 'username': username }, function (data, status) {
+                        console.log('usao u dugme');
+                        printPastTrainings(data);
+                        trType = true;
+                    });
+                }
+                else {
+                    $.get("/api/Training/SortTrainerTrainings", { 'sortType': "type_asc", 'username': username }, function (data, status) {
+                        console.log('usao u dugme');
+                        printPastTrainings(data);
+                        trType = false;
+                    });
+                }
+
+            });
+        }
+
+
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+    </script>
+
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <title>Training history</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeTrainer.html">Home</a>
+        <a href="MyFutureTrainings.html">Organizuj trening</a>
+        <a href="MyFinishedTrainings.html">Istorija treninga</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <h2>Istorija zavrsenih treninga</h2>
+        <div id="tr"></div>
+        <div id="visitors" style="display: none;"></div>
+
+        <h2>Pretraga: </h2>
+        <table>
+            <tr>
+                <td>Naziv:</td>
+                <td><input type="text" name="name" id="name" placeholder="Unesite naziv" /></td>
+            </tr>
+            <tr>
+                <td>Tip treninga: </td>
+                <td>
+                    <select id="type">
+                        <option value="SVI">SVI</option>
+                        <option value="YOGA">YOGA</option>
+                        <option value="LES_MILLS">LES_MILLS</option>
+                        <option value="BODY_PUMP">BODY_PUMP</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Godina: > </td>
+                <td id="dateMin"></td>
+                <td><</td>
+                <td id="dateMax"></td>
+                <td id='yearError' style="display: none; color: red"></td>
+            </tr>
+            <tr>
+                <td colspan="4"><button id="btnSearch">Pretrazi</button></td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

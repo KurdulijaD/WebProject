@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfGroupTraining xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <GroupTraining>
+    <Name>Fight Club</Name>
+    <TrainingType>LES_MILLS</TrainingType>
+    <FitnessCenterId>1</FitnessCenterId>
+    <DurationOfTraining>120</DurationOfTraining>
+    <DateOfTraining>2022-07-07T12:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>1</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Power Pilates</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>1</FitnessCenterId>
+    <DurationOfTraining>120</DurationOfTraining>
+    <DateOfTraining>2022-07-07T10:30:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>2</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Yoga Time</Name>
+    <TrainingType>YOGA</TrainingType>
+    <FitnessCenterId>2</FitnessCenterId>
+    <DurationOfTraining>90</DurationOfTraining>
+    <DateOfTraining>2022-07-11T08:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>3</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Cardio</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>3</FitnessCenterId>
+    <DurationOfTraining>60</DurationOfTraining>
+    <DateOfTraining>2022-07-09T09:30:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>4</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Burn Zone</Name>
+    <TrainingType>LES_MILLS</TrainingType>
+    <FitnessCenterId>3</FitnessCenterId>
+    <DurationOfTraining>120</DurationOfTraining>
+    <DateOfTraining>2022-08-07T11:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>5</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Tonus</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>4</FitnessCenterId>
+    <DurationOfTraining>90</DurationOfTraining>
+    <DateOfTraining>2022-08-12T09:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>6</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Zen Zone</Name>
+    <TrainingType>YOGA</TrainingType>
+    <FitnessCenterId>4</FitnessCenterId>
+    <DurationOfTraining>120</DurationOfTraining>
+    <DateOfTraining>2022-07-10T12:30:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>7</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Glute 300</Name>
+    <TrainingType>LES_MILLS</TrainingType>
+    <FitnessCenterId>5</FitnessCenterId>
+    <DurationOfTraining>60</DurationOfTraining>
+    <DateOfTraining>2022-07-08T12:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>8</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Box Club</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>1</FitnessCenterId>
+    <DurationOfTraining>90</DurationOfTraining>
+    <DateOfTraining>2022-05-08T09:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors>
+      <string>dejo</string>
+      <string>malina</string>
+    </Visitors>
+    <Deleted>false</Deleted>
+    <Finished>true</Finished>
+    <TrainingId>9</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Burn Zone</Name>
+    <TrainingType>YOGA</TrainingType>
+    <FitnessCenterId>1</FitnessCenterId>
+    <DurationOfTraining>120</DurationOfTraining>
+    <DateOfTraining>2022-04-10T12:30:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors>
+      <string>dejo</string>
+      <string>malina</string>
+    </Visitors>
+    <Deleted>false</Deleted>
+    <Finished>true</Finished>
+    <TrainingId>10</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Glute 300</Name>
+    <TrainingType>LES_MILLS</TrainingType>
+    <FitnessCenterId>4</FitnessCenterId>
+    <DurationOfTraining>60</DurationOfTraining>
+    <DateOfTraining>2022-05-09T12:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors>
+      <string>dejo</string>
+      <string>malina</string>
+    </Visitors>
+    <Deleted>false</Deleted>
+    <Finished>true</Finished>
+    <TrainingId>11</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Body Building</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>4</FitnessCenterId>
+    <DurationOfTraining>60</DurationOfTraining>
+    <DateOfTraining>2022-04-11T20:00:00</DateOfTraining>
+    <MaxVisitor>20</MaxVisitor>
+    <Visitors>
+      <string>dejo</string>
+      <string>malina</string>
+    </Visitors>
+    <Deleted>false</Deleted>
+    <Finished>true</Finished>
+    <TrainingId>12</TrainingId>
+  </GroupTraining>
+  <GroupTraining>
+    <Name>Push day</Name>
+    <TrainingType>BODY_PUMP</TrainingType>
+    <FitnessCenterId>2</FitnessCenterId>
+    <DurationOfTraining>40</DurationOfTraining>
+    <DateOfTraining>2022-07-22T20:00:00</DateOfTraining>
+    <MaxVisitor>1</MaxVisitor>
+    <Visitors />
+    <Deleted>false</Deleted>
+    <Finished>false</Finished>
+    <TrainingId>14</TrainingId>
+  </GroupTraining>
+</ArrayOfGroupTraining>

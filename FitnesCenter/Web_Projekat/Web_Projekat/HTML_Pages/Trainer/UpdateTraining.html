@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var today = new Date();
+            var min = today.getMinutes();
+            var hrs = today.getHours();
+            var dd = today.getDate() + 3; //uslov tri dana unapred
+            var mm = today.getMonth() + 1;
+            var yyyy = today.getFullYear();
+
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+
+            if (min < 10) {
+                min = '0' + min;
+            }
+
+            if (hrs < 10) {
+                hrs = '0' + hrs;
+            }
+
+            today = yyyy + '-' + mm + '-' + dd + 'T' + hrs + ':' + min;
+            let item = `<input type="datetime-local" id="date" name="date" min='${today}'>`;
+            $('#datedate').html(item);
+
+            updateTraining();
+            logOut();
+        });
+
+        //--------------IZMENI TRENING
+        function updateTraining() {
+            let id = window.location.href.split('?id=')[1];
+            //let data = getTrainingById(id);
+
+            //mapiramo vec upisane vrijednosti
+            $.get("/api/Training/GetTrainingById", { 'id': id }, function (data, status) {
+                console.log('usao u get' + data);
+                $("#name").val(data.Name);
+                if (data.TrainingType == 1)
+                    $("#type").val("1").change();
+                else if (data.TrainingType == 2)
+                    $("#type").val("2").change();
+                $("#duration").val(data.DurationOfTraining);
+                $("#date").val(data.DateOfTraining);
+                $("#maxNum").val(data.MaxVisitor);
+
+                newCredentials(id);
+            }).fail((xhr) => { console.log(xhr.responseText); });
+
+
+        }
+
+        //----FUNKCIJA ZA IZMJENU PODATAKA
+        function newCredentials(id) {
+            $('#btnChange').click(function () {
+                let name = $("#name").val();
+                let type = $("#type").find(":selected").text();
+                let duration = $("#duration").val();
+                let date = $("#date").val();
+                let maxNum = $("#maxNum").val();
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (name == "") {
+                    $("#nameError").html('Unesite naziv!');
+                    $("#nameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#nameError").hide();
+                }
+
+                if (duration == "") {
+                    $("#durationError").html('Unesite trajanje treninga!');
+                    $("#durationError").show();
+                    flag = false;
+                }
+                else {
+                    $("#durationError").hide();
+                }
+
+                if (date == "") {
+                    $("#dateError").html('Unesite datum!');
+                    $("#dateError").show();
+                    flag = false;
+                }
+                else {
+                    $("#dateError").hide();
+                }
+
+                if (maxNum == "") {
+                    $("#maxNumError").html('Unesite maksimalan broj posjetilaca!');
+                    $("#maxNumError").show();
+                    flag = false;
+                }
+                else {
+                    $("#maxNumError").hide();
+                }
+
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/api/Training/UpdateTraining/' + id,
+                        data:
+                        {
+                            'name': name,
+                            'trainingType': type,
+                            'durationOfTraining': duration,
+                            'dateOfTraining': date,
+                            'maxVisitor': maxNum
+                        },
+                        success: function (result) {
+                            if (result != null) {
+                                $("#alert-success").fadeIn(2000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno izmenjen');
+                            }
+                            else {
+                                $("#alert-danger").fadeIn(2000);
+                                $("#alert-danger").fadeOut(1000);
+                                console.log('neuspjesno izmenjen');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+    <meta charset="utf-8" />
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <title>Update training</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeTrainer.html">Home</a>
+        <a href="MyFutureTrainings.html">Organizuj trening</a>
+        <a href="MyFinishedTrainings.html">Istorija treninga</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <h2>Izmeni trening</h2>
+        <table>
+            <tr>
+                <td>Naziv:</td>
+                <td>
+                    <input type="text" name="name" id="name" />
+                    <label id='nameError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Tip treninga:</td>
+                <td>
+                    <select id="type">
+                        <option value="0">YOGA</option>
+                        <option value="1">LES_MILLS</option>
+                        <option value="2">BODY_PUMP</option>
+                    </select>
+                    <label id='typeError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Trajanje treninga:</td>
+                <td>
+                    <input type="number" name="duration" id="duration" />
+                    <label id='durationError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Datum:</td>
+                <td id="datedate">
+
+                    <label id='dateError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Maksimalan broj posjetilaca:</td>
+                <td>
+                    <input type="number" id="maxNum" name="maxNum">
+                    <label id='maxNumError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><button id="btnChange">Izmeni</button></td>
+            </tr>
+        </table>
+
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesna izmjena podataka!</strong>
+        </div>
+        <div id="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Izmjena podataka neuspjesna. Provjerite unesene podatke!
+        </div>
+    </div>
+    
+
+</body>
+</html>

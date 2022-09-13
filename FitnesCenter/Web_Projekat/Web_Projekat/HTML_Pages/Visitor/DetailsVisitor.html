@@ -1,0 +1,301 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let id = window.location.href.split('?id=')[1];
+            loadDetails(id);
+            signOnTraining();
+            unsignFromTraining();
+            leaveComment();
+            logOut();
+        });
+
+        function loadDetails(id) {
+            $.get("/api/Home/GetAllFC", function (data, status) {
+                for (i in data) {
+                    if (data[i].FcId == id) {
+                        printFitnessCenters(data[i]);
+                        $.get("/api/Training/GetSpecificGT", { 'id': id }, function (data, status) {
+                            printTrainings(data);
+                            printComments(id);
+                        });
+
+                    }
+                }
+            });
+
+        }
+
+        //---------PRIJAVA NA TRENING
+        function signOnTraining() {
+            $(document).on('click', '.btnSign', function () {
+                let trId = $(this).attr('name');
+                let usrnm = sessionStorage.getItem('username');
+                let parameter = trId + '_' + usrnm;
+                $.post("/api/Training/SignTraining/" + parameter, function (result) {
+                    if (result != null) {
+                        console.log('signovao');
+                        let fcId = window.location.href.split('?id=')[1];
+                        $.get("/api/Training/GetSpecificGT", { 'id': fcId }, function (data, status) {
+                            printTrainings(data);
+                        });
+                    }
+                });
+            });
+        }
+
+        //-------ODJAVA SA TRENINGA
+        function unsignFromTraining() {
+            $(document).on('click', '.btnUnsign', function () {
+                let trId = $(this).attr('name');
+                let usrnm = sessionStorage.getItem('username');
+                let parameter = trId + '_' + usrnm;
+                $.post("/api/Training/UnsignTraining/" + parameter, function (result) {
+                    if (result != null) {
+                        console.log('unsignovao');
+                        let fcId = window.location.href.split('?id=')[1];
+                        $.get("/api/Training/GetSpecificGT", { 'id': fcId }, function (data, status) {
+                            printTrainings(data);
+                        });
+                    }
+                });
+            });
+        }
+
+        //---------Detaljni ispis
+        function printFitnessCenters(fc) {
+            var ownerName = "";
+            $.get("/api/Users/GetOwner", { 'username': fc.Owner }, function (data, status) {
+                ownerName = data.FirstName + ' ' + data.LastName;
+                console.log('u funkciji: ' + ownerName);
+                console.log('usao u print fc');
+                let item = `<div><div><h2>Detalji izabranog fitnes centra</h2></div><div></div>`;
+                item += `<h3>${fc.Name}</h3><div>`;
+                item += `<table><tr><td>Adresa:</td><td>${fc.Address.StreetName} ${fc.Address.StreetNumber}</td></tr>`
+                item += `<tr><td>Godina otvaranja:</td><td>${fc.OpeningYear}</td></tr>`;
+                item += `<tr><td>Vlasnik:</td><td>${ownerName}</td></tr>`;
+                item += `<tr><td>Cena mesecne clanarine:</td><td>${fc.MonthlyPrice}€</td></tr>`;
+                item += `<tr><td>Cena pojedinacnog treninga:</td><td>${fc.TrainingPrice}€</td></tr>`;
+                item += `<tr><td>Cena grupnog treninga:</td><td>${fc.GroupTrainingPrice}€</td></tr>`;
+                item += `<tr><td>Cena treninga sa trenerom:</td><td>${fc.TrainingWithTrainerPrice}€</td></tr>`;
+                item += '</div></table></div>';
+                item += '<br/>';
+                item += '<h3>Dostupni treninzi</h3>';
+
+                $('#fc').html(item);
+                console.log('FC loaded');
+            });
+
+
+        }
+
+
+        //---ispisivanje treninga
+        function printTrainings(data) {
+            let usrnm = sessionStorage.getItem('username');
+            console.log('usao u print get gp');
+            let item = "";
+
+            for (i in data) {
+                if (data[i].Finished == false && data[i].Deleted == false) {
+                    item += '<table id="trainings">';
+                    item += `<tr><td>Trening:</td><td>${data[i].Name}</td>`;
+                    item += `<tr><td>Tip:</td><td>${data[i].Type}</td></tr>`;
+                    item += `<tr><td>Trajanje:</td><td>${data[i].DurationOfTraining}min</td></tr>`;
+                    item += `<tr><td>Datum odrzavanja:</td><td>${data[i].StrDate}</td></tr>`;
+                    item += `<tr><td>Maksimalan broj posjetilaca: </td><td>${data[i].MaxVisitor}</td></tr>`;
+                    item += `<tr><td>Broj prijavljenih:</td><td>${data[i].Visitors.length}</td></tr>`;
+                    item += '</table><br/>';
+
+                    let prijavljen = false;
+                    for (j in data[i].Visitors) {
+                        if (data[i].Visitors[j] == usrnm)
+                            prijavljen = true;
+                    }
+
+                    if (data[i].Visitors.length < data[i].MaxVisitor) {
+                        if (prijavljen == false) {
+                            item += `<button name="${data[i].TrainingId}" class="btnSign">Prijava</button>`;
+
+                        }
+                        else {
+                            item += `<button name="${data[i].TrainingId}" class="btnUnsign">Odjava</button>`;
+                        }
+                    }
+                    else if (data[i].Visitors.length == data[i].MaxVisitor && prijavljen == true) {
+                        item += `<button name="${data[i].TrainingId}" class="btnUnsign">Odjava</button>`;
+                    }
+                }
+            }
+
+            $('#tr').html(item);
+            console.log('zavrsio print get gp');
+
+        }
+
+        //---ISPISIVANJE KOMENTARA
+        function printComments(id) {
+            item = "";
+
+            $.get("/api/Home/GetAllComments", function (data, status) {
+                console.log('usao u komentare');
+                if (data == null) {
+                    item += '<div><h3>Nema komentara:<h3></div>';
+                }
+                else {
+                    item += '<div><h3>Komentari<h3></div>';
+                }
+
+                for (i in data) {
+                    if (data[i].FitnessCenterId == id && data[i].Validate == true) {
+                        item += '<div><table>';
+                        item += `<tr><td>Korisnik:</td><td>${data[i].Visitor.Username}</td></tr>`;
+                        item += `<tr><td>Komentar:</td><td>${data[i].Text}</td></tr>`;
+                        item += `<tr><td>Ocena:</td><td>${data[i].Mark}</td></tr>`;
+                        item += '</table></div><br/>';
+                    }
+                }
+
+                $('#com').html(item);
+                console.log('zavrsio komentare');
+            });
+        }
+
+        //-----------OSTAVLJANJE KOMENTARA
+        function leaveComment() {
+            $('#btnYes').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.get('/api/Training/GetMyTrainings?username=' + username, function (data, status) {
+                    let id = window.location.href.split('?id=')[1];
+                    let validate = false;
+                    for (i in data) {
+                        if (data[i].FitnessCenterId == id)
+                            validate = true;
+                    }
+
+                    if (validate) {
+                        $("#leaveCom").show();
+                    }
+                    else {
+                        $("#comError").html('Komentar mozete ostaviti ako ste prisustvovali barem jednom treningu!');
+                        $("#comError").show();
+                    }
+                });
+            });
+
+            $('#btnComment').click(function () {
+                let text = $("#text").val();
+                let mark = $("#mark").val();
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (text == "") {
+                    $("#textError").html('Unesite neki komentar!');
+                    $("#textError").show();
+                    flag = false;
+                }
+                else {
+                    $("#textError").hide();
+                }
+
+                if (mark == "") {
+                    $("#markError").html('Unesite ocjenu!');
+                    $("#markError").show();
+                    flag = false;
+                }
+                else if (mark < 1 || mark > 10) {
+                    $("#markError").html('Ocjena mora biti 1-10!');
+                    $("#markError").show();
+                    flag = false;
+                }
+                else {
+                    $("#markError").hide();
+                }
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    let id = window.location.href.split('?id=')[1];
+                    let username = sessionStorage.getItem('username');
+
+                    $.get("/api/Users/GetVisitor", { 'username': username }, function (data, status) {
+                        $.post('/api/Home/LeaveComment',
+                            {
+                                'visitor': data,
+                                'fitnessCenterId': id,
+                                'text': text,
+                                'mark': mark,
+                            }, function (result) {
+                                if (result != null) {
+                                    $("#alert-success").fadeIn(2000);
+                                    $("#alert-success").fadeOut(1000);
+                                    $("#leaveCom").hide();
+                                }
+                            });
+                    });
+                }
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+
+    </script>
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeVisitor.html">Home</a>
+        <a href="MyTrainings.html">Treninzi</a>
+        <a style="float: right" href="" id="logout">Log out</a>
+        <a style="float: right" href="MyProfile.html">Profil</a>
+    </div>
+
+    <div id="mainDiv">
+        <div id="fc"></div>
+        <div id="tr"></div>
+        <div id="com"></div>
+
+        <h5>Da li zelite ostaviti komentar i ocjenu za ovaj fitnes centar?</h5><button id="btnYes"> Da </button>
+
+        <label id='comError' style="display: none; color: red"></label>
+        <div id="leaveCom" style="display: none;">
+            <div>Vas komentar: </div>
+            <div><textarea id="text" name="text" rows="3" cols="30" placeholder="Unesite komentar"></textarea></div>
+            <div id='textError' style="display: none; color: red"></div><br />
+            <div>Ocjena : <input type="number" id="mark" name="mark" maxlength="2" size="2" placeholder="1-10" /></div>
+            <div id='markError' style="display: none; color: red"></div><br />
+            <button id="btnComment">Ostavi komentar</button>
+        </div>
+
+        <div id="alert-success" style="display: none;">
+            <strong>Hvala na komentaru!</strong>
+        </div>
+        <div id="alert-danger" style="display: none;">
+            <strong>Greska!</strong>Provjerite unesene podatke!
+        </div>    
+    </div>
+</body>
+</html>

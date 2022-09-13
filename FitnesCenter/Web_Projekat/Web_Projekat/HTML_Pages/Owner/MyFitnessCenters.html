@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            printFitnessCenters();
+            addFitnessCenter();
+            deleteFitnessCenter();
+            changeFitnessCenter();
+            logOut();
+        });
+
+        //ISPISI SVE FITNES CENTRE
+        function printFitnessCenters() {
+            let username = sessionStorage.getItem('username');
+            $.get('/api/Home/GetFCOwner', { 'username': username }, function (fc, status) {
+                let item = "";
+                item = `<div><h2>Moji fitnes centri</h2></div>`;
+                item += `<table border=1><tr><th>Naziv</th><th>Adresa</th><th>Godina otvaranja</th><th>Cena mesecne clanarine:</th><th>Cena pojedinacnog treninga:</th><th>Cena grupnog treninga:</th><th>Cena treninga sa trenerom</th><th>Opcije</th></tr>`
+                for (i in fc) {
+                    if (fc[i].Deleted == false) {
+                        item += `<tr><td>${fc[i].Name}</td><td>${fc[i].Address.StreetName} ${fc[i].Address.StreetNumber}</td><td>${fc[i].OpeningYear}</td><td>${fc[i].MonthlyPrice}€</td><td>${fc[i].TrainingPrice}€</td><td>${fc[i].GroupTrainingPrice}€</td><td>${fc[i].TrainingWithTrainerPrice}€</td>`;
+                        item += `<td><button name="${fc[i].FcId}" class="btnDelete">Obrisi</button><button name="${fc[i].FcId}" class="btnChange">Izmeni</button></td></tr>`
+                    }
+
+                }
+                item += '</table></div>';
+
+                $('#fc').html(item);
+            });
+
+        }
+
+
+        //-----OBRISI FITNES CENTAR
+        function deleteFitnessCenter() {
+            $(document).on('click', '.btnDelete', function () {
+                let id = $(this).attr('name');
+                $.ajax({
+                    url: '/api/Home/' + id,
+                    type: 'DELETE',
+                    success: function (result) {
+                        // Do something with the result
+                        if (result != null) {
+
+                            $("#alert-success-delete").fadeIn(2000);
+                            $("#alert-success-delete").fadeOut(1000);
+                            printFitnessCenters();
+                        }
+                        else {
+                            $("#alert-danger-delete").fadeIn(2000);
+                            $("#alert-danger-delete").fadeOut(1000);
+                        }
+                    }
+                });
+
+                $
+            });
+        }
+
+
+        function changeFitnessCenter() {
+            $(document).on('click', '.btnChange', function () {
+                let id = $(this).attr('name');
+                window.location.replace('UpdateFitnessCenter.html?id=' + id);
+
+            });
+        }
+
+
+        //---------DODAVANJE FITNES CENTRA
+        function addFitnessCenter() {
+            $('#btnCreate').click(function () {
+                let name = $("#name").val();
+                let street = $("#street").val();
+                let number = $("#number").val();
+                let city = $("#city").val();
+                let postNum = $("#postNum").val();
+                let monthPrice = $("#monthPrice").val();
+                let yearPrice = $("#yearPrice").val();
+                let trainingPrice = $("#trainingPrice").val();
+                let groupPrice = $("#groupPrice").val();
+                let trainerPrice = $("#trainerPrice").val();
+
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (name == "") {
+                    $("#nameError").html('Unesite naziv!');
+                    $("#nameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#nameError").hide();
+                }
+
+                if (street == "") {
+                    $("#streetError").html('Unesite ulicu!');
+                    $("#streetError").show();
+                    flag = false;
+                }
+                else {
+                    $("#streetError").hide();
+                }
+
+                if (number == "") {
+                    $("#numberError").html('Unesite broj ulice!');
+                    $("#numberError").show();
+                    flag = false;
+                }
+                else {
+                    $("#numberError").hide();
+                }
+
+                if (city == "") {
+                    $("#cityError").html('Unesite grad!');
+                    $("#cityError").show();
+                    flag = false;
+                }
+                else {
+                    $("#cityError").hide();
+                }
+                //
+                if (postNum == "") {
+                    $("#postNumError").html('Unesite postanski broj!');
+                    $("#postNumError").show();
+                    flag = false;
+                }
+                else {
+                    $("#postNumError").hide();
+                }
+
+                if (monthPrice == "") {
+                    $("#monthPriceError").html('Unesite mjesecnu clanarinu!');
+                    $("#monthPriceError").show();
+                    flag = false;
+                }
+                else {
+                    $("#monthPriceError").hide();
+                }
+
+                if (yearPrice == "") {
+                    $("#yearPriceError").html('Unesite godisnju clanarinu!');
+                    $("#yearPriceError").show();
+                    flag = false;
+                }
+                else {
+                    $("#yearPriceError").hide();
+                }
+
+                if (trainingPrice == "") {
+                    $("#trainingPriceError").html('Unesite cenu treninga!');
+                    $("#trainingPriceError").show();
+                    flag = false;
+                }
+                else {
+                    $("#trainingPriceError").hide();
+                }
+                //
+                if (groupPrice == "") {
+                    $("#groupPriceError").html('Unesite cenu grupnog treninga!');
+                    $("#groupPriceError").show();
+                    flag = false;
+                }
+                else {
+                    $("#groupPriceError").hide();
+                }
+
+                if (trainerPrice == "") {
+                    $("#trainerPriceError").html('Unesite cenu treninga sa trenerom!');
+                    $("#trainerPriceError").show();
+                    flag = false;
+                }
+                else {
+                    $("#trainerPriceError").hide();
+                }
+
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    let username = sessionStorage.getItem('username');
+                    $.post(`/api/Home/AddFitnessCenter`,
+                        {
+                            'username': username,
+                            'name': name,
+                            'StreetName': street,
+                            'StreetNumber': number,
+                            'City': city,
+                            'PostNumber': postNum,
+                            'MonthlyPrice': monthPrice,
+                            'YearPrice': yearPrice,
+                            'TrainingPrice': trainingPrice,
+                            'GroupTrainingPrice': groupPrice,
+                            'TrainingWithTrainerPrice': trainerPrice
+                        },
+                        function (data) {
+                            if (data != null) {
+                                $("#alert-success").fadeIn(2000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno kreiran');
+                                printFitnessCenters();
+                            }
+                            else {
+                                $("#alert-date").fadeIn(2000);
+                                $("#alert-date").fadeOut(1000);
+                                console.log('neuspjesno kreiran');
+                            }
+                        });
+                }
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <meta charset="utf-8" />
+    <title>My Fitness Centers</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeOwner.html">Home</a>
+        <a href="MyFitnessCenters.html">Fitnes centri</a>
+        <a href="Trainers.html">Treneri</a>
+        <a href="Comments.html">Komentari</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <h2>Kreiraj fitnes centar</h2>
+        <table>
+            <tr>
+                <td>Naziv:</td>
+                <td>
+                    <input type="text" id="name" name="name" />
+                    <label id='nameError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Ulica:</td>
+                <td>
+                    <input type="text" id="street" name="street" />
+                    <label id='streetError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Broj:</td>
+                <td>
+                    <input type="number" id="number" name="number" />
+                    <label id='numberError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Grad:</td>
+                <td>
+                    <input type="text" id="city" name="city" />
+                    <label id='cityError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Postanski broj::</td>
+                <td>
+                    <input type="number" id="postNum" name="postNum" />
+                    <label id='postNumError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Cena mesecne clanarine:</td>
+                <td>
+                    <input type="number" id="monthPrice" name="monthPrice" />
+                    <label id='monthPriceError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Cena godisnje clanarine:</td>
+                <td>
+                    <input type="number" id="yearPrice" name="yearPrice" />
+                    <label id='yearPriceError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Cena treninga:</td>
+                <td>
+                    <input type="number" id="trainingPrice" name="trainingPrice" />
+                    <label id='trainingPriceError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Cena grupnog treninga:</td>
+                <td>
+                    <input type="number" id="groupPrice" name="groupPrice" />
+                    <label id='groupPriceError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Cena treninga sa trenerom:</td>
+                <td>
+                    <input type="number" id="trainerPrice" name="trainerPrice" />
+                    <label id='trainerPriceError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr><td colspan="2"><button id="btnCreate">Dodaj</button></td></tr>
+
+        </table>
+
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesno dodavanje!</strong>
+        </div>
+        <div id="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Dodavaanje neuspjesno. Provjerite unesene podatke!
+        </div>
+
+        <div id="fc"></div>
+
+        <div id="alert-success-delete" style="display: none;">
+            <strong>Uspjesno brisanje!</strong>
+        </div>
+        <div id="alert-danger-delete" style="display: none;">
+            <strong>Greska!</strong> Brisanje neuspjesno. Ovaj trening ima prijavljene posjetioce!
+        </div>
+    </div>
+
+</body>
+</html>

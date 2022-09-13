@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            printComments();
+            validateComments();
+            logOut();
+        });
+
+
+        //-------ODOBRI KOMENTAR
+        function validateComments() {
+            $(document).on('click', '.btnValidate', function () {
+                let id = $(this).attr('name');
+                $.ajax({
+                    url: "/api/Home/" + id,
+                    type: 'PUT',
+                    success: function (res) {
+                        printComments();
+                    },
+                });
+            });
+        }
+
+        //--------ISPISI KOMENTARE
+        function printComments() {
+            let username = sessionStorage.getItem('username');
+            $.get('/api/Home/GetNewComments', { 'username': username }, function (data, status) {
+
+
+                let item = "<div><h2>Svi komentari</h2></div><div>";
+                for (i in data) {
+                    var retVal = "";
+                    $.ajax({
+                        url: "/api/Training/GetFC?id=" + data[i].FitnessCenterId,
+                        type: 'GET',
+                        success: function (res) {
+                            retVal = res;
+                        },
+                        async: false
+                    });
+
+                    item += `<table>
+                             <tr><td>Fitnes centar:</td><td>${retVal.Name}</td></tr>
+                            <tr>
+                            <td>Korisnik:</td>
+                             <td>[${data[i].Visitor.Username}] ${data[i].Visitor.FirstName} ${data[i].Visitor.LastName}</td>
+                            </tr>
+                             <tr>
+                            <td>Utisak:</td>
+                            <td>${data[i].Text}</td>
+                            </tr>
+                            <tr>
+                            <td>Ocena:</td>
+                            <td>${data[i].Mark}</td>
+                            </tr>
+                            </table><br/>`;
+                    item += `<button class="btnValidate" name="${data[i].CommentId}">Odobri</button>`
+
+                }
+
+                item += `<div>`
+
+                $("#com").html(item);
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+    </script>
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <meta charset="utf-8" />
+    <title>Comments</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeOwner.html">Home</a>
+        <a href="MyFitnessCenters">Fitnes centri</a>
+        <a href="Trainers.html">Treneri</a>
+        <a href="Comments.html">Komentari</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <div id="com"></div>
+    </div>
+
+</body>
+</html>

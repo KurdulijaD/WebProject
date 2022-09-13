@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html>
+
+
+<head>
+    <meta charset="utf-8" />
+    <title>Log In</title>
+
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            logIn();
+        });
+
+        function logIn() {
+            $('#btnLogin').click(function () {
+                let username = $("#username").val();
+                let password = $("#password").val();
+
+                //provjera ispravnosti unosa
+                let flag = true;
+                if (username == "") {
+                    $("#usernameError").html('Unesite korisnicko ime!');
+                    $("#usernameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#usernameError").hide();
+                }
+
+                if (password == "") {
+                    $("#passwordError").html('Unesite lozinku!');
+                    $("#passwordError").show();
+                    flag = false;
+                }
+                else {
+                    $("#passwordError").hide();
+                }
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                    console.log('greska prilikom logovanja');
+                }
+                else {
+                    $.post('/api/Login/LogIn',
+                        {
+                            'username': username,
+                            'password': password,
+                        },
+                        function (result) {
+                            if (result == null) {
+                                $("#alert-danger").fadeIn(2000);
+                                $("#alert-danger").fadeOut(1000);
+                                console.log('greska prilikom logovanja');
+                            }
+                            else {
+                                $("#alert-success").fadeIn(1000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno kreiran');
+                                //postavljamo sesiju korisnika
+                                sessionStorage.setItem('username', username);
+                                sessionStorage.setItem('password', password);
+                                sessionStorage.setItem('uloga', result.StrRole);
+                                sessionStorage.setItem('token', 'Basic ' + btoa(result.Username + ":" + result.Password));
+                                //redirektujemo korisnika na pocetnu stranicu
+                                if (result.StrRole == "OWNER") {
+                                    window.location.replace("/HTML_Pages/Owner/HomeOwner.html");
+                                } else if (result.StrRole == "TRAINER") {
+                                    window.location.replace("/HTML_Pages/Trainer/HomeTrainer.html");
+                                } else if (result.StrRole == "VISITOR") {
+                                    window.location.replace("/HTML_Pages/Visitor/HomeVisitor.html");
+                                }
+                            }                            
+
+                        });
+                }
+
+            });
+        }
+
+    </script>
+
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+</head>
+<body>
+    <div class="navbar">
+        <a href="Home.html">Home</a>
+        <a style="float: right" href="Registration.html">Register</a>
+        <a style="float: right" href="Login.html">Log in</a>
+    </div>
+
+    <div id="mainDiv">
+        <div id="registration">
+            <h2>PRIJAVA</h2>
+            <div>
+                <label>Korisničko ime:</label>
+                <input id="username" type="text" name="username" />
+                <label id='usernameError' style="display: none; color: red"></label>
+                <br />
+
+                <label>Lozinka:</label>
+                <input id="password" type="password" name="password" />
+                <label id='passwordError' style="display: none; color: red"></label>
+                <br />
+            </div>
+            <input id="btnLogin" type="submit" value="Prijavi se" />
+        </div>
+
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesna prijava!</strong>
+        </div>
+        <div id="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Prijava neuspjesna. Provjerite unesene podatke!
+        </div>
+
+    </div>
+    
+</body>
+</html>

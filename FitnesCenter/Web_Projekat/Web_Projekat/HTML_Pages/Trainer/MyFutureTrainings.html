@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var today = new Date();
+            var min = today.getMinutes();
+            var hrs = today.getHours();
+            var dd = today.getDate() + 3; //uslov tri dana unapred
+            var mm = today.getMonth() + 1;
+            var yyyy = today.getFullYear();
+
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+
+            if (min < 10) {
+                min = '0' + min;
+            }
+
+            if (hrs < 10) {
+                hrs = '0' + hrs;
+            }
+
+            today = yyyy + '-' + mm + '-' + dd + 'T' + hrs + ':' + min;
+            let item = `<input type="datetime-local" id="date" name="date" min='${today}'>`;
+            $('#datedate').html(item);
+
+            addTraining();
+            printFutureTrainings();
+            logOut();
+            showVisitors();
+            deleteTraining();
+        });
+
+
+        //-----BRISANJE TRENINGA
+        function deleteTraining() {
+            $(document).on('click', '.btnDelete', function () {
+                let id = $(this).attr('name');
+                $.ajax({
+                    url: '/api/Training/' + id,
+                    type: 'DELETE',
+                    success: function (result) {
+                        // Do something with the result
+                        if (result != null) {
+
+                            $("#alert-success-delete").fadeIn(2000);
+                            $("#alert-success-delete").fadeOut(1000);
+                            printFutureTrainings();
+                        }
+                        else {
+                            $("#alert-danger-delete").fadeIn(2000);
+                            $("#alert-danger-delete").fadeOut(1000);
+                        }
+                    }
+                });
+
+                $
+            });
+        }
+
+        //-------IZMJENA TRENINGA
+        $(document).on('click', '.btnChange', function () {
+            let id = $(this).attr('name');
+            window.location.replace("/HTML_Pages/Trainer/UpdateTraining.html?id=" + id);
+        });
+
+        //--------ORGANIZUJ TRENING
+        function addTraining() {
+            $('#btnCreate').click(function () {
+                let name = $("#name").val();
+                let type = $("#type").find(":selected").text();
+                let duration = $("#duration").val();
+                let date = $("#date").val();
+                let maxNum = $("#maxNum").val();
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (name == "") {
+                    $("#nameError").html('Unesite naziv!');
+                    $("#nameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#nameError").hide();
+                }
+
+                if (duration == "") {
+                    $("#durationError").html('Unesite trajanje treninga!');
+                    $("#durationError").show();
+                    flag = false;
+                }
+                else {
+                    $("#durationError").hide();
+                }
+
+                if (date == "") {
+                    $("#dateError").html('Unesite datum!');
+                    $("#dateError").show();
+                    flag = false;
+                }
+                else {
+                    $("#dateError").hide();
+                }
+
+                if (maxNum == "") {
+                    $("#maxNumError").html('Unesite maksimalan broj posjetilaca!');
+                    $("#maxNumError").show();
+                    flag = false;
+                }
+                else {
+                    $("#maxNumError").hide();
+                }
+
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    let username = sessionStorage.getItem('username');
+                    $.post(`/api/Training/AddTraining`,
+                        {
+                            'username': username,
+                            'name': name,
+                            'trainingType': type,
+                            'durationOfTraining': duration,
+                            'dateOfTraining': date,
+                            'maxVisitor': maxNum
+                        },
+                        function (data) {
+                            if (data != null) {
+                                $("#alert-success").fadeIn(2000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno kreiran');
+                                printFutureTrainings();
+                            }
+                            else {
+                                $("#alert-date").fadeIn(2000);
+                                $("#alert-date").fadeOut(1000);
+                                console.log('neuspjesno kreiran');
+                            }
+                        });
+                }
+            });
+        }
+
+        function getFcId(id) {
+            var retVal = "";
+            $.ajax({
+                url: "/api/Training/GetFC?id=" + id,
+                type: 'GET',
+                success: function (res) {
+                    retVal = res;
+                },
+                async: false
+            });
+
+            return retVal
+        }
+
+        //------------ISPIS TRENINGA
+        function printFutureTrainings() {
+            let item = "";
+            let username = sessionStorage.getItem('username');
+            $.get("/api/Training/GetTrainingsForTrainer", { 'username': username }, function (data, status) {
+                console.log('usao u get' + data);
+                if (data == null) {
+                    item += "<h4>Nemate zakazanih treninga<h4>";
+                }
+                else {
+                    item += `<div><table border=1>`;
+                    item += `<tr><th>Naziv</th><th>Tip treninga</th><th>Fitnes centar</th><th>Trajanje treninga</th><th>Datum odrzavanja</th><th>Maksimalno posjetilaca</th><th>Broj prijavljenih</th><th>Opcije</th></tr>`;
+
+                    for (i in data) {
+                        if (data[i].Finished == false && data[i].Deleted == false) {
+                            var fc = getFcId(data[i].FitnessCenterId);
+                            item += `<tr><td>${data[i].Name}</td>`;
+                            item += `<td>${data[i].Type}</td>`;
+                            item += `<td>${fc.Name}</td>`;
+                            item += `<td>${data[i].DurationOfTraining}min</td>`;
+                            item += `<td>${data[i].StrDate}</td>`;
+                            item += `<td>${data[i].MaxVisitor}</td>`;
+                            item += `<td>${data[i].Visitors.length} <button name="${data[i].TrainingId}" class="btnShow">Prikazi</button></td>`;
+                            item += `<td><button name="${data[i].TrainingId}" class="btnChange">Izmeni</button><button name="${data[i].TrainingId}" class="btnDelete">Obrisi</button></td></tr>`;
+                        }
+                    }
+                    item += `</table></div>`;
+                }
+                $('#tr').html(item);
+                console.log('zavrsio ispis treninga');
+            }).fail((xhr) => { console.log(xhr.responseText); });
+
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+        //--------PRIKAZI KO JE PRIUSTVOVAO TRENINGU
+        function showVisitors() {
+            console.log('usao u btn za visitore');
+            $(document).on('click', '.btnShow', function () {
+                let id = $(this).attr('name');
+                window.location.replace("/HTML_Pages/Trainer/ShowVisitors.html?id=" + id);
+            });
+        }
+
+    </script>
+
+
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeTrainer.html">Home</a>
+        <a href="MyFutureTrainings.html">Organizuj trening</a>
+        <a href="MyFinishedTrainings.html">Istorija treninga</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <h2>Organizuj trening</h2>
+        <table>
+            <tr>
+                <td>Naziv:</td>
+                <td>
+                    <input type="text" name="name" id="name" />
+                    <label id='nameError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Tip treninga:</td>
+                <td>
+                    <select id="type">
+                        <option value="YOGA">YOGA</option>
+                        <option value="LES_MILLS">LES_MILLS</option>
+                        <option value="BODY_PUMP">BODY_PUMP</option>
+                    </select>
+                    <label id='typeError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Trajanje treninga:</td>
+                <td>
+                    <input type="number" name="duration" id="duration" />
+                    <label id='durationError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Datum:</td>
+                <td id="datedate">
+
+                    <label id='dateError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>Maksimalan broj posjetilaca:</td>
+                <td>
+                    <input type="number" id="maxNum" name="maxNum">
+                    <label id='maxNumError' style="display: none; color: red"></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><button id="btnCreate">Dodaj</button></td>
+            </tr>
+        </table>
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesno dodavanje!</strong>
+        </div>
+        <div class="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Dodavaanje neuspjesno. Provjerite unesene podatke!
+        </div>
+        <div class="alert-date" style="display: none;">
+            <strong>Greska!</strong> Trening se moze zakazati najmanje tri dana unapred!
+        </div>
+
+        <h2>Moji treninzi</h2>
+        <div id="tr"></div>
+        <div id="alert-success-delete" style="display: none;">
+            <strong>Uspjesno brisanje!</strong>
+        </div>
+        <div id="alert-danger-delete" style="display: none;">
+            <strong>Greska!</strong> Brisanje neuspjesno. Ovaj trening ima prijavljene posjetioce!
+        </div>
+    </div>
+
+</body>
+</html>

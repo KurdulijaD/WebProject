@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Details</title>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let id = window.location.href.split('?id=')[1];
+            console.log(name);
+            loadDetails(id);
+            logOut();
+        });
+
+
+        function loadDetails(id) {
+            $.get("/api/Home/GetAllFC", function (data, status) {
+                console.log('usao u get 1');
+                for (i in data) {
+                    if (data[i].FcId == id) {
+                        printFitnessCenters(data[i]);
+                        $.get("/api/Training/GetSpecificGT", { 'id': id }, function (data, status) {
+                            printTrainings(data);
+                            printComments(id);
+                        });
+                    }
+                }
+                console.log('zavrsio get 1');
+            });
+        }
+
+
+        //---ISPIS FITNES CENTRA
+        function printFitnessCenters(fc) {
+            var ownerName = "";
+            $.get("/api/Users/GetOwner", { 'username': fc.Owner }, function (data, status) {
+                ownerName = data.FirstName + ' ' + data.LastName;
+                console.log('u funkciji: ' + ownerName);
+                console.log('usao u print fc');
+                let item = `<div><div><h2>Detalji izabranog fitnes centra</h2></div><div></div>`;
+                item += `<h3>${fc.Name}</h3><div>`;
+                item += `<table><tr><td>Adresa:</td><td>${fc.Address.StreetName} ${fc.Address.StreetNumber}</td></tr>`
+                item += `<tr><td>Godina otvaranja:</td><td>${fc.OpeningYear}</td></tr>`;
+                item += `<tr><td>Vlasnik:</td><td>${ownerName}</td></tr>`;
+                item += `<tr><td>Cena mesecne clanarine:</td><td>${fc.MonthlyPrice}€</td></tr>`;
+                item += `<tr><td>Cena pojedinacnog treninga:</td><td>${fc.TrainingPrice}€</td></tr>`;
+                item += `<tr><td>Cena grupnog treninga:</td><td>${fc.GroupTrainingPrice}€</td></tr>`;
+                item += `<tr><td>Cena treninga sa trenerom:</td><td>${fc.TrainingWithTrainerPrice}€</td></tr>`;
+                item += '</div></table></div>';
+                item += '<br/>';
+                item += '<h3>Dostupni treninzi</h3>';
+
+                let id = window.location.href.split('?id=')[1];
+                console.log(id);
+
+                $('#fc').html(item);
+                console.log('FC loaded');
+            });
+        }
+
+        //----ISPIS TRENINGA
+        function printTrainings(data) {
+            let item = "";
+            for (i in data) {
+                if (data[i].Finished == false && data[i].Deleted == false) {
+                    item += '<table>';
+                    item += `<tr><td>Trening:</td><td>${data[i].Name}</td></tr>`;
+                    item += `<tr><td>Tip:</td><td>${data[i].Type}</td></tr>`;
+                    item += `<tr><td>Trajanje:</td><td>${data[i].DurationOfTraining}min</td></tr>`;
+                    item += `<tr><td>Datum odrzavanja:</td><td>${data[i].StrDate}</td></tr>`;
+                    item += `<tr><td>Maksimalan broj posjetilaca: </td><td>${data[i].MaxVisitor}</td></tr>`;
+                    item += `<tr><td>Broj prijavljenih:</td><td>${data[i].Visitors.length}</td></tr>`;
+                    item += '</table><br/>';
+                }
+            }
+
+            $('#tr').html(item);
+        }
+
+        //-------ISPISIVANJE KOMENTARA
+        function printComments(id) {
+            item = "";
+
+            $.get("/api/Home/GetAllComments", function (data, status) {
+                console.log('usao u komentare');
+                if (data == null) {
+                    item += '<div><h3>Nema komentara:<h3></div>';
+                }
+                else {
+                    item += '<div><h3>Komentari<h3></div>';
+                }
+
+                for (i in data) {
+                    if (data[i].FitnessCenterId == id && data[i].Validate == true) {
+                        item += '<div><table>';
+                        item += `<tr><td>Korisnik:</td><td>${data[i].Visitor.Username}</td></tr>`;
+                        item += `<tr><td>Komentar:</td><td>${data[i].Text}</td></tr>`;
+                        item += `<tr><td>Ocena:</td><td>${data[i].Mark}</td></tr>`;
+                        item += '</table></div><br/>';
+                    }
+                }
+
+                $('#com').html(item);
+                console.log('zavrsio komentare');
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="HomeOwner.html">Home</a>
+        <a href="MyFitnessCenters">Fitnes centri</a>
+        <a href="Trainers.html">Treneri</a>
+        <a href="Comments.html">Komentari</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <div id="fc"></div>
+        <div id="tr"></div>
+        <div id="com"></div>
+    </div>
+
+</body>
+</html>

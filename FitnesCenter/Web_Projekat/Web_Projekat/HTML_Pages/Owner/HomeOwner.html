@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadFitnessCenters();
+            logOut();
+        });
+
+        //-----------ISPISIVANJE TABELE
+        function printFitnessCenter(data) {
+            let tableOfFC = '<table border="1" id="table">';
+            tableOfFC += '<tr><th id="thName">Ime</th><th id="thAddr">Adresa</th><th id="thYear">Godina</th><th></th></tr>';
+            for (i in data) {
+                if (data[i].Deleted == false) {
+                    let content = '<td>' + data[i].Name + '</td>';
+                    content += '<td>' + data[i].Address.StreetName + ' ' + data[i].Address.StreetNumber + '</td>';
+                    content += '<td>' + data[i].OpeningYear + '</td>';
+                    content += '<td><button class="btnDetails" name="' + data[i].FcId + '">Detalji</button></td>';
+                    tableOfFC += '<tr>' + content + '</tr>';
+                }
+            }
+            tableOfFC += '</table>';
+            $('#fitnessCenters').html(tableOfFC);
+            console.log('FC loaded');
+
+            SortFC();
+            SearchFC();
+            prikaziDetalje();
+        }
+        //----------------------------------
+
+
+        //---------UCITAVANJE FITNES CENTRA
+        function loadFitnessCenters() {
+            console.log('loading');
+            $.get("/api/Home/GetAllFC", function (data, status) {
+                printFitnessCenter(data);
+            });
+        }
+        //------------------------------
+
+
+
+        //--------PRIKAZI DETALJE
+        function prikaziDetalje() {
+            $('.btnDetails').click(function () {
+                let id = $(this).attr('name');
+                window.location.replace("/HTML_Pages/Owner/DetailsOwner.html?id=" + id);
+            });
+        }
+        //---------------------------
+
+
+
+        //------------PRETRAGA ELEMENATA
+        function SearchFC() {
+            $('#btnSearch').click(function () {
+                let name = $("#name").val();
+                let address = $("#address").val();
+                let yearLow = $("#yearLow").val();
+                let yearHigh = $("#yearHigh").val();
+
+                if (yearLow < 1950 || yearLow > 2022) {
+                    $("#yearError").html('Godina mora biti izmedju 1950 i 2022!');
+                    $("#yearError").show();
+                }
+                else {
+                    $("#yearError").hide();
+                }
+
+                if (yearHigh < 1950 || yearHigh > 2022) {
+                    $("#yearError").html('Godina mora biti izmedju 1950 i 2022!');
+                    $("#yearError").show();
+                }
+                else {
+                    $("#yearError").hide();
+                }
+
+                $.get("/api/Home/SearchFC",
+                    {
+                        //string name, string address, string yearHigh, string yearLow
+                        'name': name,
+                        'address': address,
+                        'yearHigh': yearHigh,
+                        'yearLow': yearLow
+
+                    }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                    });
+            });
+        }
+        //----------------------------------------------
+
+
+
+        //--------------SORTIRANJE ELEMENATA
+        let addr = false;
+        let nm = false;
+        let yr = false;
+
+        function SortFC() {
+            $('#thAddr').click(function () {
+                if (!addr) {
+                    $.get("/api/Home/SortFC", { 'sortType': "address_des" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        addr = true;
+                    });
+                }
+                else {
+                    $.get("/api/Home/SortFC", { 'sortType': "address_asc" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        addr = false;
+                    });
+                }
+
+            });
+
+
+            $('#thName').click(function () {
+                if (!nm) {
+                    $.get("/api/Home/SortFC", { 'sortType': "name_des" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        nm = true;
+                    });
+                }
+                else {
+                    $.get("/api/Home/SortFC", { 'sortType': "name_asc" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        nm = false;
+                    });
+                }
+
+            });
+
+            $('#thYear').click(function () {
+                if (!yr) {
+                    $.get("/api/Home/SortFC", { 'sortType': "year_des" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        yr = true;
+                    });
+                }
+                else {
+                    $.get("/api/Home/SortFC", { 'sortType': "year_asc" }, function (data, status) {
+                        console.log('usao u dugme');
+                        printFitnessCenter(data);
+                        yr = false;
+                    });
+                }
+
+            });
+        }
+        //----------------------------------------------
+
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+
+    <meta charset="utf-8" />
+    <title>FC Explorer</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeOwner.html">Home</a>
+        <a href="MyFitnessCenters.html">Fitnes centri</a>
+        <a href="Trainers.html">Treneri</a>
+        <a href="Comments.html">Komentari</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+
+    <div id="mainDiv">
+        <h2>Fitnes Centri</h2>
+
+        <div id="fitnessCenters"></div>
+
+        <h2>Pretraga: </h2>
+        <table>
+            <tr>
+                <td>Ime:</td>
+                <td><input type="text" name="name" id="name" placeholder="Unesite ime" /></td>
+            </tr>
+            <tr>
+                <td>Adresa:</td>
+                <td><input type="text" name="address" id="address" placeholder="Unesite adresu" /></td>
+            </tr>
+            <tr>
+                <td>Godina otvaranja: > </td>
+                <td><input type="number" name="yearLow" id="yearLow" placeholder=">1950" /></td>
+                <td><</td>
+                <td><input type="number" name="yearHigh" id="yearHigh" placeholder="<2022" /></td>
+                <td id='yearError' style="display: none; color: red"></td>
+            </tr>
+            <tr>
+                <td colspan="4"><button id="btnSearch">Pretrazi</button></td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

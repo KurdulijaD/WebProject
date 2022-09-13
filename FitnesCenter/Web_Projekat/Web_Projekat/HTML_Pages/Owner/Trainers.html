@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            getFitnessCentersOfTrainer();
+            registerTrainer();
+            printTrainers();
+            blockTrainer();
+            unblockTrainer();
+            logOut();
+        });
+
+        //BLOKIRAJ TRENERA
+        function blockTrainer() {
+            $(document).on('click', '.btnBlock', function () {
+                let username = $(this).attr('name');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Users/BlockTrainer/' + username,
+                    success: function (result) {
+                        $("#alert-block").fadeIn(2000);
+                        $("#alert-block").fadeOut(1000);
+                        printTrainers();
+                    }
+                });
+            });
+        }
+
+        //ODBLOKIRAJ TRENERA
+        function unblockTrainer() {
+            $(document).on('click', '.btnUnblock', function () {
+                let username = $(this).attr('name');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Users/UnblockTrainer/' + username,
+                    success: function (result) {
+                        $("#alert-unblock").fadeIn(2000);
+                        $("#alert-unblock").fadeOut(1000);
+                        printTrainers();
+                    }
+                });
+            });
+        }
+
+
+        //ISPISI TRENERE
+        function printTrainers() {
+            let username = sessionStorage.getItem('username');
+            $.get("/api/Home/GetTrainersForOwner", { 'username': username }, function (data, status) {
+                item = "";
+                if (data == "") {
+                    item += `<h4>Nemate zaposlenih trenera!</h4>`;
+                }
+                else {
+                    item += `<div><table border=1>`;
+                    item += `<tr><th>[Korisnicko ime]</th> <th>Ime</th> <th>Prezime</th> <th>Datum rodjenja</th> <th>Email</th> <th>Opcije</th></tr>`;
+                    for (i in data) {
+                        item += `<tr><td>[${data[i].Username}]</td> <td>${data[i].FirstName}</td> <td>${data[i].LastName}</td> <td>${data[i].StrBirthday}</td> <td>${data[i].Email}</td> <td>`;
+                        if (data[i].Blocked == false)
+                            item += `<button class="btnBlock" name="${data[i].Username}">Blokiraj</button></td ></tr >`;
+                        else
+                            item += `<button class="btnUnblock" name="${data[i].Username}">Odblokiraj</button></td ></tr >`;
+
+                    }
+                    item += `</table></div>`;
+                }
+
+                $("#trainers").html(item);
+            });
+        }
+
+
+        //DODAJ OPCIJE ZA IZBOR FITNES CENTRA
+        function getFitnessCentersOfTrainer() {
+            let username = sessionStorage.getItem('username');
+            $.get('/api/Home/GetFCOwner', { 'username': username }, function (data, status) {
+                let item = "";
+                for (i in data) {
+                    item += `<option value="${data[i].FcId}">${data[i].Name}<option>`;
+                }
+
+                $("#fc").html(item);
+            });
+        }
+
+
+        //REGISTRUJ TRENERA
+        function registerTrainer() {
+            $('#btnRegister').click(function () {
+
+                //preuzimanje vrijednosti iz forme
+                let firstname = $("#firstname").val();
+                let lastname = $("#lastname").val();
+                let username = $("#username").val();
+                let password = $("#password").val();
+                let gender = $("#gender").find(":selected").text();
+                let email = $("#email").val();
+                let birthday = $("#birthday").val();
+                let fcId = $("#fc").find(":selected").val();
+
+                $.get("/api/Users/GetAllUsers", function (data, status) {
+                    console.log('usao u get');
+                    for (i in data) {
+                        if (data[i].Username == username) {
+                            $("#usernameError").html('Korisnicko ime vec postoji!');
+                            $("#usernameError").show();
+                        }
+                    }
+                });
+
+                let flag = true;
+                //provjera ispravnosti unosa
+                if (firstname == "") {
+                    $("#firstnameError").html('Unesite ime!');
+                    $("#firstnameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#firstnameError").hide();
+                }
+
+                if (lastname == "") {
+                    $("#lastnameError").html('Unesite prezime!');
+                    $("#lastnameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#lastnameError").hide();
+                }
+
+                if (username == "") {
+                    $("#usernameError").html('Unesite korisnicko ime!');
+                    $("#usernameError").show();
+                    flag = false;
+                }
+                else {
+                    $("#usernameError").hide();
+                }
+
+                if (password == "") {
+                    $("#passwordError").html('Unesite lozinku!');
+                    $("#passwordError").show();
+                    flag = false;
+                }
+                else {
+                    $("#passwordError").hide();
+                }
+
+                if (email == "") {
+                    $("#emailError").html('Unesite e mail!');
+                    $("#emailError").show();
+                    flag = false;
+                }
+                else {
+                    $("#emailError").hide();
+                }
+
+                if (birthday == "") {
+                    $("#birthdayError").html('Unesite datum rodjenja!');
+                    $("#birthdayError").show();
+                    flag = false;
+                }
+                else {
+                    $("#birthdayError").hide();
+                }
+
+                if (fcId == "") {
+                    $("#fcError").html('Odaberite fitnes centar!');
+                    $("#fcError").show();
+                    flag = false;
+                }
+                else {
+                    $("#fcError").hide();
+                }
+
+                if (flag == false) {
+                    $("#alert-danger").fadeIn(2000);
+                    $("#alert-danger").fadeOut(1000);
+                }
+                else {
+                    //registracija
+                    $.post('/api/Register/SignInTrainer/' + fcId,
+                        {
+                            'firstname': firstname,
+                            'lastname': lastname,
+                            'username': username,
+                            'password': password,
+                            'gender': gender,
+                            'email': email,
+                            'birthday': birthday
+                        },
+                        function (result) {
+                            if (result != null) {
+                                $("#alert-success").fadeIn(2000);
+                                $("#alert-success").fadeOut(1000);
+                                console.log('uspjesno kreiran');
+                                printTrainers();
+                            }
+                            else {
+                                $("#alert-danger").fadeIn(2000);
+                                $("#alert-danger").fadeOut(1000);
+                                console.log('neuspjesno kreiran');
+                            }
+                        });
+                }
+
+            });
+        }
+
+        //---------------ODJAVITE KORISNIKA
+        function logOut() {
+            $('#logout').click(function () {
+                let username = sessionStorage.getItem('username');
+                $.ajax({
+                    type: 'PUT',
+                    url: '/api/Login/LogOut/' + username,
+                    success: function (result) {
+                        console.log('uspjesno izlogovan');
+                        sessionStorage.clear();
+                        window.location.replace("/HTML_Pages/Unsigned/Home.html")
+                    }
+                });
+            });
+        }
+
+    </script>
+    <link href="../Css/navbar.css" rel="stylesheet" />
+    <link href="../Css/main.css" rel="stylesheet" />
+
+    <meta charset="utf-8" />
+    <title>Trainers</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="HomeOwner.html">Home</a>
+        <a href="MyFitnessCenters.html">Fitnes centri</a>
+        <a href="Trainers.html">Treneri</a>
+        <a href="Comments.html">Komentari</a>
+        <a style="float:right" href="" id="logout">Log out</a>
+        <a style="float:right" href="MyProfile.html">Profile</a>
+    </div>
+
+    <div id="mainDiv">
+        <h2>Kreiraj trenera</h2>
+        <div>
+
+            <label>Ime:</label>
+            <input id="firstname" type="text" name="firstname" />
+            <label id='firstnameError' style="display: none; color: red"></label>
+            <br />
+
+            <label>Prezime:</label>
+            <input id="lastname" name="lastname" />
+            <label id='lastnameError' style="display: none; color: red"></label>
+            <br />
+
+            <label>Korisničko ime:</label>
+            <input id="username" type="text" name="username" />
+            <label id='usernameError' style="display: none; color: red"></label>
+            <br />
+
+            <label>Lozinka:</label>
+            <input id="password" type="password" name="password" />
+            <label id='passwordError' style="display: none; color: red"></label>
+            <br />
+
+            <label>Pol:</label>
+            <select id="gender">
+                <option value="Muški">Muški</option>
+                <option value="Ženski">Ženski</option>
+            </select>
+            <br />
+
+            <label>Datum rodjenja:</label>
+            <input type="date" id="birthday" name="birthday">
+            <label id='birthdayError' style="display: none; color: red"></label>
+            <br />
+
+            <label>E mail:</label>
+            <input id="email" type="text" name="email" />
+            <label id='emailError' style="display: none; color: red"></label>
+            <br />
+
+            <label>Fitnes centar:</label>
+            <select id="fc"></select>
+            <label id='fcError' style="display: none; color: red"></label>
+            <br />
+        </div>
+        <input id="btnRegister" type="submit" value="Registruj " />
+
+        <div id="alert-success" style="display: none;">
+            <strong>Uspjesna registracija!</strong>
+        </div>
+        <div class="alert-danger" style="display: none;">
+            <strong>Greska!</strong> Registracija neuspjesna. Provjerite unesene podatke!
+        </div>
+
+        <br />
+        <div>
+            <h2>Zaposleni treneri</h2>
+            <div id="trainers"></div>
+        </div>
+
+        <div id="alert-block" style="display: none;">
+            <strong>Uspjesno ste blokirali trenera!</strong>
+        </div>
+        <div id="alert-unblock" style="display: none;">
+            <strong>Uspjesno ste odblokirali trenera!</strong>
+        </div>
+    </div>
+
+</body>
+</html>

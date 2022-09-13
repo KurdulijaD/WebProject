@@ -1,0 +1,76 @@
+﻿#mainDiv {
+    width: 700px;
+    margin: 16px auto;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    padding-top: 60px;
+}
+
+@media (max-width: 979px) {
+    body {
+        padding-top: 0px;
+    }
+}
+
+td {
+    text-align: center;
+}
+
+th {
+    text-align: center;
+    cursor: pointer;
+    
+}
+
+button {
+    cursor: pointer;
+    background-color: #107ef6;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #ffffff;
+}
+table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: Arial, Helvetica, sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+    border-color: #808080;
+}
+
+table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+}
+
+
+input[type=text] {
+    border-radius: 4px;
+}
+input[type=text]:focus {
+    border: 3px solid #555;
+}
+
+input[type=submit] {
+    cursor: pointer;
+    background-color: #107ef6;
+    border-radius: 4px;
+}
+
+    input[type=submit]:hover {
+        background-color: #ffffff;
+    }
+
